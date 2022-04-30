@@ -1,0 +1,5 @@
+# Git Ignore file for the forcast.py project
+
+/test_files
+/test_files/*
+

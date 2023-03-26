@@ -30,7 +30,7 @@ def testArgs(): # Retrives args and formats / validates them
             return False
 
     stop = False # Used to flag bad input args
-    if len(sys.argv) == 1: 
+    if len(sys.argv) == 1:
 		# Return downtown Minneapolis lat / long if no coords provided
         coordsList = '44.9771', '-93.2724'
 
@@ -83,7 +83,13 @@ def location(strJSON):
     return (targetURL, targetCity, targetState)
 
 def clear():
-    _ = call('clear') # Screen clearing function assumes posix OS without testing
+    if sys.platform.startswith('darwin') or sys.platform.startswith('linux'):
+        _ = call('clear')
+    elif sys.platform.startswith('win32'):
+        _ = call('cls')
+    else:
+        print(f"Operating System {sys.platform} detected but is not supported")
+        sys.exit(1)
 
 def formatDateTime(teststr):
     testlst = teststr.split('T')

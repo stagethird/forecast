@@ -111,14 +111,26 @@ while looping == True:
     timeSlice = periodsList[h]
     clear()
     print("Forecast for {}, {}\n".format(city, state))
-    itemsToPrint = [1, 2, 3, 5, 7, 8, 9, 11, 12]
+    itemsToPrint = [1, 2, 3, 5, 8, 9, 10, 11, 12, 15]
     i = 0
+
     for detail in timeSlice:
         if i in itemsToPrint:
             if i == 2 or i == 3:
-                print(detail, " : ", formatDateTime(timeSlice[detail]))
+                print(detail, ":", formatDateTime(timeSlice[detail]))
+            elif i == 5:
+                print(f"{detail} : {timeSlice[detail]}F")
+            elif i == 8 or i == 10:
+                testvar = timeSlice[detail]['value']
+                if testvar == None:
+                    testvar = 0
+                print(f"{detail} : {testvar}%")
+            elif i == 9:
+                testvar = timeSlice[detail]['value']
+                testvar = int(testvar * 1.8 + 32) # Convert C to F
+                print(f"{detail} : {testvar}F")
             else:
-                print(detail, " : ", timeSlice[detail])
+                print(detail, ":", timeSlice[detail])
         i += 1
 
     print('\n\033[31mPress right and left arrows to go fwd / back, [ESC] to exit.\033[0m')

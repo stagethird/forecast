@@ -106,11 +106,18 @@ try:
     dict1 = page.json()
     dict2 = dict1['properties']
     periodsList = dict2['periods']
+ 
+except requests.exceptions.ConnectionError:
+    print("ConnectionError: Site not reachable")
+    sys.exit(1)
 
-except Exception: # Make this production-worthy
-	print("\033[31mError retriving data. Urls queried: \033[0m", locationPage.url, page.url)
-	print("\n\033[31mData recieved: \033[0m", page.text[:500])
-
+except Exception as e:
+    print("Exception:", e)
+    print("Error retriving data. Urls queried:", locationPage.url, page.url)
+    print(f"Title: {dict1['title']}, Status: {dict1['status']}")
+    print(dict1['detail'])
+    sys.exit(1)
+    
 h = 0
 looping = True
 while looping == True:

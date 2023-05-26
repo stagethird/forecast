@@ -38,8 +38,8 @@ def testArgs(): # Retrives args and formats / validates them
         if ',' in sys.argv[1]:
             coordsList = sys.argv[1].split(',')
         else:
-    	    print("2 Coordinates needed, Latitude and Longitude\n")
-    	    stop = True
+            print("2 Coordinates needed, Latitude and Longitude\n")
+            stop = True
 
     elif len(sys.argv) == 3: #Coords seperated by space
         coordsList = [sys.argv[1], sys.argv[2]]

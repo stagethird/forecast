@@ -72,7 +72,7 @@ def get_daily_forecast(lat, long):
         page = requests.get(url)
         dict1 = page.json()
         periodsList = dict1['properties']['periods']
-        return periodsList
+        return (city, state, periodsList)
 
     except requests.exceptions.ConnectionError:
         print("ConnectionError: Site not reachable")
@@ -87,6 +87,6 @@ def get_daily_forecast(lat, long):
 
 
 if __name__ == '__main__':
-    periodsList = get_daily_forecast(*get_coords())
+    city, state, periodsList = get_daily_forecast(*get_coords())
 
 

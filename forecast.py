@@ -7,9 +7,9 @@ from getkey import getkey, keys # External add-on module
 
 def extract_args():
     if len(sys.argv) == 1:
-        return 
+        return
 
-    elif len(sys.argv) == 2: 
+    elif len(sys.argv) == 2:
         if ',' in sys.argv[1]:
             coordsList = sys.argv[1].split(',')
         else:
@@ -43,10 +43,10 @@ def validate_args(coords_tuple):
         return False
 
     return True
-    
+
 def get_coords():
     MINNEAPOLIS = ('44.9771', '-93.2724')
-    
+
     if extract_args():
         if validate_args(extract_args()):
             lat, long = extract_args()
@@ -65,7 +65,7 @@ def location(locationPage):
     targetCity =  _['properties']['relativeLocation']['properties']['city']
     targetState = _['properties']['relativeLocation']['properties']['state']
     return (targetURL, targetCity, targetState)
-    
+
 def get_daily_forecast(lat, long):
     try:
         locationPage = requests.get(f"https://api.weather.gov/points/{lat},{long}")
@@ -126,7 +126,7 @@ if __name__ == '__main__':
                     print(f"{detail} : {testvar}%")
                 elif i == 9:
                     testvar = timeSlice[detail]['value']
-                     # Convert C to F
+                    # Convert C to F
                     testvar = int(testvar * 1.8 + 32)
                     print(f"{detail} : {testvar}F")
                 else:
@@ -139,5 +139,5 @@ if __name__ == '__main__':
         elif key == keys.LEFT and h > 0:
             h -= 1
         elif key == keys.ESCAPE:
-            sys.exit(0) 
+            sys.exit(0)
 

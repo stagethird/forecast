@@ -1,86 +1,91 @@
-#! /usr/bin/python3
+#! /usr/bin/env python3
 import sys
 import requests
 import json
 from subprocess import call
 from getkey import getkey, keys # External add-on module
 
-def testArgs(): # Retrives args and formats / validates them
-    def numbersCheck(latTest, lonTest):
-        try:
-            latTestFloat = float(latTest)
-            lonTestFloat = float(lonTest)
-
-        except ValueError:
-            return False
-
-        if latTestFloat > 17 and latTestFloat < 72:
-            latTestPassed = True
-        else:
-            latTestPassed = False
-
-        if lonTestFloat > -179 and lonTestFloat < -50:
-            lonTestPassed = True
-        else:
-            lonTestPassed = False
-
-        if latTestPassed == True and lonTestPassed == True:
-            return True
-        else:
-            return False
-
-    stop = False # Used to flag bad input args
+def extract_args():
     if len(sys.argv) == 1:
-		# Return downtown Minneapolis lat / long if no coords provided
-        coordsList = '44.9771', '-93.2724'
+        return
 
-    elif len(sys.argv) == 2: # Split coords if entered seperated by only a comma
+    elif len(sys.argv) == 2:
         if ',' in sys.argv[1]:
             coordsList = sys.argv[1].split(',')
         else:
             print("2 Coordinates needed, Latitude and Longitude\n")
-            stop = True
+            sys.exit(2)
 
-    elif len(sys.argv) == 3: #Coords seperated by space
-        coordsList = [sys.argv[1], sys.argv[2]]
-        # Get rid of comma in coordsList[0] if present between entered coords
-        # (i.e. comma AND space)
-        if coordsList[0][-1] == ',':
-            tempString = coordsList[0]
-            tempString2 = tempString[0:len(tempString)-1]
-            coordsList[0] = tempString2
+    elif len(sys.argv) == 3:
+        coordsList = [sys.argv[1].replace(',',''), sys.argv[2]]
 
     else:
-        print("There are too many arguments,", len(sys.argv) - 1, "\n")
-        stop = True
-
-    if stop == True:
+        print(f"{len(sys.argv) - 1} coordinates were supplied, there should be only 2\n")
         sys.exit(2)
 
-    if stop == False: # No 'errors' in previous operations
-        # Add '-' to coordsList[1] if not present
-        if '-' not in coordsList[1]:
-            coordsList[1] = "-{}".format(coordsList[1])
+    if '-' not in coordsList[1]:
+        coordsList[1] = f"-{coordsList[1]}"
 
-        x = coordsList[0]
-        y = coordsList[1]
+    return tuple(coordsList)
 
-        numbersValid = numbersCheck(x, y) # Internal function to sanity check numbers
-        if numbersValid == True:
-            return (x, y)
+def validate_args(coords_tuple):
+    try:
+        latTestFloat = float(coords_tuple[0])
+        lonTestFloat = float(coords_tuple[1])
+
+    except ValueError:
+        return False
+
+    if latTestFloat <= 17 or latTestFloat >= 72:
+        return False
+
+    if lonTestFloat <= -179 or lonTestFloat >= -50:
+        return False
+
+    return True
+
+def get_coords():
+    MINNEAPOLIS = ('44.9771', '-93.2724')
+
+    if extract_args():
+        if validate_args(extract_args()):
+            lat, long = extract_args()
         else:
             print("Please confirm that the coords entered are both valid numbers, then try again\n")
             sys.exit(2)
 
-def location(strJSON):
-    dict1 = strJSON.json()
-    dict2 = dict1['properties']
-    targetURL = dict2['forecast']
-    dict3 = dict2['relativeLocation']
-    dict4 = dict3['properties']
-    targetCity = dict4['city']
-    targetState = dict4['state']
+    else:
+        lat, long = MINNEAPOLIS
+
+    return (lat, long)
+
+def location(locationPage):
+    _ = locationPage.json()
+    targetURL = _['properties']['forecast']
+    targetCity =  _['properties']['relativeLocation']['properties']['city']
+    targetState = _['properties']['relativeLocation']['properties']['state']
     return (targetURL, targetCity, targetState)
+
+def get_daily_forecast(lat, long):
+    try:
+        locationPage = requests.get(f"https://api.weather.gov/points/{lat},{long}")
+        # breakpoint()
+        url, city, state = location(locationPage)
+        page = requests.get(url)
+        dict1 = page.json()
+        periodsList = dict1['properties']['periods']
+        return (city, state, periodsList)
+
+    except requests.exceptions.ConnectionError:
+        print("ConnectionError: Site not reachable")
+        sys.exit(1)
+
+    except Exception as e:
+        print("Exception:", e)
+        print("Error retriving data. Urls queried:", locationPage.url, page.url)
+        print(f"Title: {dict1['title']}, Status: {dict1['status']}")
+        print(dict1['detail'])
+        sys.exit(1)
 
 def clear():
     if sys.platform.startswith('darwin') or sys.platform.startswith('linux'):
@@ -98,59 +103,41 @@ def formatDateTime(teststr):
     outstr = "Date: {}, Time: {}".format(testlst[0], testlst2[0])
     return outstr
 
-try:
-    lat, long = testArgs() # Internal function
-    locationPage = requests.get("https://api.weather.gov/points/{},{}".format(lat, long))
-    url, city, state = location(locationPage) # Internal function
-    page = requests.get(url)
-    dict1 = page.json()
-    dict2 = dict1['properties']
-    periodsList = dict2['periods']
- 
-except requests.exceptions.ConnectionError:
-    print("ConnectionError: Site not reachable")
-    sys.exit(1)
+if __name__ == '__main__':
+    city, state, periodsList = get_daily_forecast(*get_coords())
+    # h is a time period incrementer
+    h = 0
+    while True:
+        timeSlice = periodsList[h]
+        clear()
+        print(f"Forecast for {city}, {state}\n")
+        itemsToPrint = [1, 2, 3, 5, 8, 9, 10, 11, 12, 15]
 
-except Exception as e:
-    print("Exception:", e)
-    print("Error retriving data. Urls queried:", locationPage.url, page.url)
-    print(f"Title: {dict1['title']}, Status: {dict1['status']}")
-    print(dict1['detail'])
-    sys.exit(1)
-    
-h = 0
-looping = True
-while looping == True:
-    timeSlice = periodsList[h]
-    clear()
-    print("Forecast for {}, {}\n".format(city, state))
-    itemsToPrint = [1, 2, 3, 5, 8, 9, 10, 11, 12, 15]
-    i = 0
+        for i, detail in enumerate(timeSlice):
+            if i in itemsToPrint:
+                if i == 2 or i == 3:
+                    print(detail, ":", formatDateTime(timeSlice[detail]))
+                elif i == 5:
+                    print(f"{detail} : {timeSlice[detail]}F")
+                elif i == 8 or i == 10:
+                    testvar = timeSlice[detail]['value']
+                    if testvar == None:
+                        testvar = 0
+                    print(f"{detail} : {testvar}%")
+                elif i == 9:
+                    testvar = timeSlice[detail]['value']
+                    # Convert C to F
+                    testvar = int(testvar * 1.8 + 32)
+                    print(f"{detail} : {testvar}F")
+                else:
+                    print(detail, ":", timeSlice[detail])
 
-    for detail in timeSlice:
-        if i in itemsToPrint:
-            if i == 2 or i == 3:
-                print(detail, ":", formatDateTime(timeSlice[detail]))
-            elif i == 5:
-                print(f"{detail} : {timeSlice[detail]}F")
-            elif i == 8 or i == 10:
-                testvar = timeSlice[detail]['value']
-                if testvar == None:
-                    testvar = 0
-                print(f"{detail} : {testvar}%")
-            elif i == 9:
-                testvar = timeSlice[detail]['value']
-                testvar = int(testvar * 1.8 + 32) # Convert C to F
-                print(f"{detail} : {testvar}F")
-            else:
-                print(detail, ":", timeSlice[detail])
-        i += 1
+        print('\n\033[31mPress right and left arrows to go fwd / back, [ESC] to exit.\033[0m')
+        key = getkey()
+        if key == keys.RIGHT and h < len(periodsList) - 1:
+            h += 1
+        elif key == keys.LEFT and h > 0:
+            h -= 1
+        elif key == keys.ESCAPE:
+            sys.exit(0)
 
-    print('\n\033[31mPress right and left arrows to go fwd / back, [ESC] to exit.\033[0m')
-    key = getkey()
-    if key == keys.RIGHT and h < len(periodsList) - 1:
-        h += 1
-    elif key == keys.LEFT and h > 0:
-        h -= 1
-    elif key == keys.ESCAPE:
-        looping = False

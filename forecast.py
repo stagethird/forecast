@@ -69,7 +69,6 @@ def location(locationPage):
 def get_daily_forecast(lat, long):
     try:
         locationPage = requests.get(f"https://api.weather.gov/points/{lat},{long}")
-        # breakpoint()
         url, city, state = location(locationPage)
         page = requests.get(url)
         dict1 = page.json()

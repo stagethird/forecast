@@ -13,17 +13,29 @@ class NWS:
         self.targetState = ""
         self.dailyPage = None
         self.dailyPeriodsList = []
+        self.hourlyPage = None
+
+        self.hourlyPeriodsList = []
 
         self._location()
 
     def _location(self):
-        # add try block here
-        self.locationPage = requests.get(f"https://api.weather.gov/points/{self.lat},{self.long}")
-        _ = self.locationPage.json()
-        self.dailyTargetURL = _['properties']['forecast']
-        self.hourlyTargetURL = _['properties']['forecastHourly']
-        self.targetCity =  _['properties']['relativeLocation']['properties']['city']
-        self.targetState = _['properties']['relativeLocation']['properties']['state']
+        try:
+            self.locationPage = requests.get(f"https://api.weather.gov/points/{self.lat},{self.long}")
+            _ = self.locationPage.json()
+            self.dailyTargetURL = _['properties']['forecast']
+            self.hourlyTargetURL = _['properties']['forecastHourly']
+            self.targetCity =  _['properties']['relativeLocation']['properties']['city']
+            self.targetState = _['properties']['relativeLocation']['properties']['state']
+
+        except requests.exceptions.ConnectionError:
+           print("\nConnectionError: Site not reachable")
+           print(f"https://api.weather.gov/points/{self.lat},{self.long}\n")
+           sys.exit(1)
+
+        except Exception as e:
+            print("\nException:", e)
+            print("in NWS._location().\n")
 
     def get_daily_forecast(self):
         try:
@@ -33,43 +45,29 @@ class NWS:
             return self.dailyPeriodsList
 
         except requests.exceptions.ConnectionError:
-            print("ConnectionError: Site not reachable\n", dailyTargetURL)
+            print("\nConnectionError: Site not reachable\n", self.dailyTargetURL)
+            print()
             sys.exit(1)
 
         except Exception as e:
-            print("Exception:", e)
-            print("in NWS.set_daily_forecast().")
+            print("\nException:", e)
+            print("in NWS.get_daily_forecast().\n")
             sys.exit(1)
 
- #    def get_hourly_forecast(lat, long):
- #        try:
- #            lat, long = testArgs()  # Internal function
- #            locationPage = requests.get(
- #                "https://api.weather.gov/points/{},{}".format(lat, long)
- #            )
- #            url, city, state = location(locationPage)  # Internal function
- #            page = requests.get(url)
- #            dict1 = page.json()
- #            periodsList = dict1["properties"]["periods"]
+    def get_hourly_forecast(self):
+        try:
+            self.hourlyPage = requests.get(self.hourlyTargetURL)
+            dict1 = self.hourlyPage.json()
+            self.hourlyPeriodsList = dict1["properties"]["periods"]
+            return self.hourlyPeriodsList
 
- #        except requests.exceptions.ConnectionError:
- #            print("ConnectionError: Site not reachable")
- #            sys.exit(1)
+        except requests.exceptions.ConnectionError:
+            print("\nConnectionError: Site not reachable\n", self.hourlyTargetURL)
+            print()
+            sys.exit(1)
 
- #        except Exception as e:
- #            print("Exception:", e)
- #            print("Error retriving data. Urls queried:", locationPage.url, page.url)
- #            print(f"Title: {dict1['title']}, Status: {dict1['status']}")
- #            print(dict1["detail"])
- #            sys.exit(1)
-
-if __name__ == "__main__":
-    me = NWS("45", "-93")
-    print(type(me.get_daily_forecast()))
-
-    # me._location()
-    # print(me.dailyTargetURL)
-    # print(me.targetCity)
-    # print(me.targetState)
-
+        except Exception as e:
+            print("\nException:", e)
+            print("in NWS.get_hourly_forecast().\n")
+            sys.exit(1)
 

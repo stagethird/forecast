@@ -14,7 +14,6 @@ class NWS:
         self.dailyPage = None
         self.dailyPeriodsList = []
         self.hourlyPage = None
-
         self.hourlyPeriodsList = []
 
         self._location()

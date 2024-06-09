@@ -1,5 +1,7 @@
-import nws_api as nws
+#! /usr/bin/env python3
 import sys
+import requests
+import json
 from subprocess import call
 from getkey import getkey, keys # External add-on module
 
@@ -57,6 +59,33 @@ def get_coords():
 
     return (lat, long)
 
+def location(locationPage):
+    _ = locationPage.json()
+    targetURL = _['properties']['forecast']
+    targetCity =  _['properties']['relativeLocation']['properties']['city']
+    targetState = _['properties']['relativeLocation']['properties']['state']
+    return (targetURL, targetCity, targetState)
+
+def get_daily_forecast(lat, long):
+    try:
+        locationPage = requests.get(f"https://api.weather.gov/points/{lat},{long}")
+        url, city, state = location(locationPage)
+        page = requests.get(url)
+        dict1 = page.json()
+        periodsList = dict1['properties']['periods']
+        return (city, state, periodsList)
+
+    except requests.exceptions.ConnectionError:
+        print("ConnectionError: Site not reachable")
+        sys.exit(1)
+
+    except Exception as e:
+        print("Exception:", e)
+        print("Error retriving data. Urls queried:", locationPage.url, page.url)
+        print(f"Title: {dict1['title']}, Status: {dict1['status']}")
+        print(dict1['detail'])
+        sys.exit(1)
+
 def clear():
     if sys.platform.startswith('darwin') or sys.platform.startswith('linux'):
         _ = call('clear')
@@ -74,12 +103,7 @@ def formatDateTime(teststr):
     return outstr
 
 if __name__ == '__main__':
-    daily = nws.NWS(*get_coords())
-    city = daily.targetCity
-    state = daily.targetState
-    daily.get_daily_forecast()
-    periodsList = daily.dailyPeriodsList
-
+    city, state, periodsList = get_daily_forecast(*get_coords())
     # h is a time period incrementer
     h = 0
     while True:

@@ -86,7 +86,7 @@ if __name__ == '__main__':
         timeSlice = periodsList[h]
         clear()
         print(f"Forecast for {city}, {state}\n")
-        itemsToPrint = [1, 2, 3, 5, 8, 9, 10, 11, 12, 15]
+        itemsToPrint = [1, 2, 3, 5, 8, 9, 10, 12, 13]
 
         for i, detail in enumerate(timeSlice):
             if i in itemsToPrint:
@@ -94,16 +94,11 @@ if __name__ == '__main__':
                     print(detail, ":", formatDateTime(timeSlice[detail]))
                 elif i == 5:
                     print(f"{detail} : {timeSlice[detail]}F")
-                elif i == 8 or i == 10:
+                elif i == 8:
                     testvar = timeSlice[detail]['value']
                     if testvar == None:
                         testvar = 0
                     print(f"{detail} : {testvar}%")
-                elif i == 9:
-                    testvar = timeSlice[detail]['value']
-                    # Convert C to F
-                    testvar = int(testvar * 1.8 + 32)
-                    print(f"{detail} : {testvar}F")
                 else:
                     print(detail, ":", timeSlice[detail])
 

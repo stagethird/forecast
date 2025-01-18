@@ -31,6 +31,7 @@ At this time `forecast.py` only works in Linux shells, due to the use of the `ge
 ## hourly_forecast.py
 
 This tool collects hourly forecast temperatures and possibility of precipitation going out 7 days, then plots both in a graphic that can be saved as a '.PNG' file.
+It uses the same conventions for passing in latitude and longitude as `forecast.py` above.
 
 This tool should work under any O.S, on any system that has the `Pandas` and `Matplotlib` libraries installed.
 >![Screenshot of hourly_forecast.py](./hourly_example.png "hourly_forecast.py")

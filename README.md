@@ -35,3 +35,14 @@ It uses the same conventions for passing in latitude and longitude as `forecast.
 
 This tool should work under any O.S, on any system that has the `Pandas` and `Matplotlib` libraries installed.
 >![Screenshot of hourly_forecast.py](./images/hourly_example.png "hourly_forecast.py")
+## wind_forecast.py
+
+This tool is very similar to `hourly_forecast` above, accepting optional
+coordinates, then using `Matplotlib`to display weather data. In this case
+24 hours of wind direction and speed ate plotted on a polar bar chart,
+then windspeeds for each individual hour are plotted on a stem plot,
+both beginning with the first data point after the current time.
+
+Like the `hourly_forecast` tool above, this tool should work under any O.S,
+on any system that has the `Pandas` and `Matplotlib` libraries installed.
+>![Screenshot of wind_forecast.py](./images/wind_example.png "wind_forecast.py")

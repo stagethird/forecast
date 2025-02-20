@@ -1,7 +1,20 @@
 import nws_api as nws
 import sys
 from subprocess import call
-from getkey import getkey, keys # External add-on module
+
+try:
+    # Try to import getkey module, if not available try the keyboard module.
+    # Set appropiate flag if successful, else close with message.
+    from getkey import getkey, keys
+    getkey_present = True 
+except ModuleNotFoundError:
+    try:
+        import keyboard
+        keyboard_present = True
+    except ModuleNotFoundError:
+        print("\nThis program requires either the 'getkey' module for Linux,")
+        print("or the 'keyboard' module for Windows")
+        sys.exit(1)
 
 def clear():
     if sys.platform.startswith('darwin') or sys.platform.startswith('linux'):
@@ -48,12 +61,15 @@ if __name__ == '__main__':
                 else:
                     print(detail, ":", timeSlice[detail])
 
-        print('\n\033[31mPress right and left arrows to go fwd / back, [ESC] to exit.\033[0m')
-        key = getkey()
-        if key == keys.RIGHT and h < len(periodsList) - 1:
-            h += 1
-        elif key == keys.LEFT and h > 0:
-            h -= 1
-        elif key == keys.ESCAPE:
-            sys.exit(0)
-
+        if getkey_present:
+            print('\n\033[31mPress right and left arrows to go fwd / back, [ESC] to exit.\033[0m')
+            key = getkey()
+            if key == keys.RIGHT and h < len(periodsList) - 1:
+                h += 1
+            elif key == keys.LEFT and h > 0:
+                h -= 1
+            elif key == keys.ESCAPE:
+                sys.exit(0)
+        elif keyboard_present:
+            # Insert Windows keybindings here
+            Pass

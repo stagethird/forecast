@@ -14,7 +14,7 @@ periodsList = hourly.hourlyPeriodsList
 # Format dataframe
 df = pd.DataFrame(periodsList)
 df['startTime'] = pd.to_datetime(df['startTime'])
-df.windSpeed = df.windSpeed.str.extract('(\d+)', expand=False).astype(int)
+df.windSpeed = df.windSpeed.str.extract(r'(\d+)', expand=False).astype(int)
 df=df[['number','windDirection','windSpeed','startTime']]
 
 degrees = np.linspace(0,360,17)[0:-1]

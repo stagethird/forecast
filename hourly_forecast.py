@@ -11,8 +11,8 @@ periodsList = hourly.hourlyPeriodsList
 
 df = pd.DataFrame(periodsList)
 df = df.drop(["name", "icon", "detailedForecast"], axis=1)
-df["startTime"] = pd.to_datetime(df["startTime"])
-df["endTime"] = pd.to_datetime(df["endTime"])
+df["startTime"] = pd.to_datetime(df["startTime"],utc=True)
+df["endTime"] = pd.to_datetime(df["endTime"],utc=True)
 
 df2 = pd.json_normalize(df.probabilityOfPrecipitation)
 df.probabilityOfPrecipitation = df2.value
